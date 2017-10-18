@@ -44,7 +44,7 @@ def forward(uuid):
     message = {
                'to': [{'email': user.email}],
                'from_email': request.form['email'],
-               'subject': 'Message from {}'.format(request.form['name']),
+               'subject': 'Message from {}'.format(request.form.get('name') or request.form['email']),
                'text': request.form['message'],
               }
     result = mandrill_client.messages.send(message=message)
