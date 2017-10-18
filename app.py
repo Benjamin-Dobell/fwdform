@@ -15,6 +15,8 @@ api_domain = os.environ['MAILGUN_DOMAIN']
 api_key = os.environ['MAILGUN_API_KEY']
 mailgun_send_url = 'https://api.mailgun.net/v3/%s/messages' % api_domain
 
+registration_disabled=os.environ['REGISTRATION_DISABLED']
+
 class User(db.Model):
 
     def __init__(self, email):
@@ -31,6 +33,8 @@ def index():
 
 @app.route('/register', methods=['POST'])
 def register():
+    if registration_disabled:
+        abort(500)
     user = User.query.filter_by(email=request.form['email']).first()
     if user:
         return ('Email already registered', 403)
