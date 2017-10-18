@@ -61,6 +61,8 @@ def forward(uuid):
     )
     if result.status_code != requests.codes.ok:
         abort(500)
+    if 'redirect' in request.form:
+        return redirect(request.form['redirect'])
     return 'Your message was sent successfully'
 
 @app.errorhandler(400)
