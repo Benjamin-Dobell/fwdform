@@ -1,7 +1,7 @@
 import os
+import requests
 from uuid import uuid4
 
-from mandrill import Mandrill
 from flask.ext.cors import CORS
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask import Flask, request, redirect, abort
@@ -9,8 +9,11 @@ from flask import Flask, request, redirect, abort
 app = Flask(__name__)
 cors = CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
-mandrill_client = Mandrill(os.environ['MANDRILL_API_KEY'])
 db = SQLAlchemy(app)
+
+api_domain = os.environ['MAILGUN_DOMAIN']
+api_key = os.environ['MAILGUN_API_KEY']
+mailgun_send_url = 'https://api.mailgun.net/v3/%s/messages' % api_domain
 
 class User(db.Model):
 
@@ -24,7 +27,7 @@ class User(db.Model):
 
 @app.route('/')
 def index():
-    return redirect('http://samdobson.github.io/fwdform')
+    return redirect('http://github.com/Benjamin-Dobell/fwdform')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -42,13 +45,17 @@ def forward(uuid):
     if not user:
         return ('User not found', 406)
     message = {
-               'to': [{'email': user.email}],
-               'from_email': request.form['email'],
+               'to': [user.email],
+               'from': request.form['email'],
                'subject': 'Message from {}'.format(request.form.get('name') or request.form['email']),
                'text': request.form['message'],
               }
-    result = mandrill_client.messages.send(message=message)
-    if result[0]['status'] != 'sent':
+    result = requests.post(
+        mailgun_send_url,
+        auth=("api", api_key),
+        data=message
+    )
+    if result.status_code != requests.codes.ok:
         abort(500)
     return 'Your message was sent successfully'
 
