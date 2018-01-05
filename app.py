@@ -15,7 +15,7 @@ api_domain = os.environ['MAILGUN_DOMAIN']
 api_key = os.environ['MAILGUN_API_KEY']
 mailgun_send_url = 'https://api.mailgun.net/v3/%s/messages' % api_domain
 
-registration_disabled=os.environ['REGISTRATION_DISABLED']
+registration_disabled=os.environ.get('REGISTRATION_DISABLED')
 fallback_from=os.environ.get('FALLBACK_FROM')
 
 class User(db.Model):
