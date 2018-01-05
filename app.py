@@ -1,5 +1,7 @@
+import logging
 import os
 import requests
+import sys
 from uuid import uuid4
 
 from flask.ext.cors import CORS
@@ -10,6 +12,10 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 db = SQLAlchemy(app)
+
+if 'DYNO' in os.environ:
+    app.logger.addHandler(logging.StreamHandler(sys.stdout))
+    app.logger.setLevel(logging.ERROR)
 
 api_domain = os.environ['MAILGUN_DOMAIN']
 api_key = os.environ['MAILGUN_API_KEY']
@@ -61,6 +67,7 @@ def forward(uuid):
         data=message
     )
     if result.status_code != requests.codes.ok:
+        app.logger.error("Received %(status)d error while sending email to %(email)s: %(error)s", {'status': result.status_code, 'email': user.email, 'error': result.text})
         abort(500)
     if 'redirect' in request.form:
         return redirect(request.form['redirect'])
