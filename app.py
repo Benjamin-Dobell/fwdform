@@ -16,6 +16,7 @@ api_key = os.environ['MAILGUN_API_KEY']
 mailgun_send_url = 'https://api.mailgun.net/v3/%s/messages' % api_domain
 
 registration_disabled=os.environ['REGISTRATION_DISABLED']
+fallback_from=os.environ.get('FALLBACK_FROM')
 
 class User(db.Model):
 
@@ -50,8 +51,8 @@ def forward(uuid):
         return ('User not found', 406)
     message = {
                'to': [user.email],
-               'from': request.form['email'],
-               'subject': 'Message from {}'.format(request.form.get('name') or request.form['email']),
+               'from': request.form.get('email') or fallback_from,
+               'subject': 'Message from {}'.format(request.form.get('name') or request.form.get('email') or 'Anonymous'),
                'text': request.form['message'],
               }
     result = requests.post(
