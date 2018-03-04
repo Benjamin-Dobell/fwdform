@@ -1,3 +1,5 @@
+Please see [fwdform2](https://github.com/glassechidna/fwdform2) for a complete rewrite, in a similar spirit, albeit with additional functionality.
+
 Quickstart contact form processing
 ----------------------------------
 
